@@ -1,3 +1,4 @@
+### ---- Imports ----- ###
 import streamlit as st
 import PyPDF2 #used to load pdf files
 import io
@@ -7,18 +8,20 @@ from dotenv import load_dotenv
 
 load_dotenv()  # Load environment variables from .env file
 
+###------------------- Set Streamlit Page Configurations -----------------------------------###
 st.set_page_config(page_title = "AI Resume Critique Agent", page_icon = ":📑", layout = "centered")
-
 st.title("AI Resume Critique Agent")
 st.markdown("Upload your resume in PDF format and get AI feedback on how to improve it.")
 
+### --------- Load in OpenAI API Key ---- ###
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
+###------------------- User Inputs for file and text input -----------------------------------###
 upload_file = st.file_uploader("Upload your resume (PDF, TXT, or DOC)", type=["pdf", "txt", "docx"])
 job_role = st.text_input("Enter the job role you are targeting:")
-
 analyze_button = st.button("Analyze Resume")
 
+###------------------- Load text from PDF or Text File -----------------------------------###
 def extract_pdf_text(pdf_file):
     reader = PyPDF2.PdfReader(pdf_file)
     text = ""
@@ -33,7 +36,7 @@ def extract_text(uploaded_file):
 
 if analyze_button and upload_file:
     try: 
-        file_content = exctract_text(upload_file)
+        file_content = extract_text(upload_file)
         
         if not file_content.strip():
             st.error("File does not have content")
@@ -52,3 +55,17 @@ if analyze_button and upload_file:
         Please provide recommendations in a clear, structured format. Highlight any relevant lines with specific recommendations."""
         
         client = OpenAI(api_key=OPENAI_API_KEY) 
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "You are an expert resume reviewer with experience in HR and recruiting"}, ## gives context to the model
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7,
+            max_tokens = 100
+        )
+        
+        st.markdown("###Analysis Results")
+        st.markdown(response.choices[0].message.content) #get first response (if more than 1) 
+    except Exception as e: 
+        st.error(f"""An error occured: {str(e)}""")
