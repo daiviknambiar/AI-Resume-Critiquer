@@ -25,6 +25,8 @@ st.markdown(
 ### --------- Load in OpenAI API Key ---- ###
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=OPENAI_API_KEY)
+
+
 ###------------------- Functions for Embedding and Similarity Calculation -----------------------------------###
 def get_embedding(text):
     """Fetch OpenAI embedding for text."""
