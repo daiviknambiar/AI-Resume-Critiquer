@@ -7,6 +7,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
+from docx  import Document
 
 load_dotenv()  # Load environment variables from .env file
 
@@ -64,6 +65,13 @@ def extract_text(uploaded_file):
     if uploaded_file.type == "application/pdf":
         return extract_pdf_text(io.BytesIO(upload_file.read()))
     return upload.file.read().decode("utf-8")
+
+def extract_docx(docx_file):
+    doc = Document(docx_file)
+    text = []
+    for para in doc.paragraphs:
+        text.append(para.text)
+    return "\n".join(text)
 
 if analyze_button and upload_file:
     try: 
